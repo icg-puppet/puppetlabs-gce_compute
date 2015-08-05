@@ -86,6 +86,10 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'An inline manifest specific to this instance.'
   end
 
+  newparam(:puppet_env) do
+    desc 'The puppet environment for this instance.'
+  end
+
   newparam(:puppet_modules) do
     desc 'List of modules to be downloaded from the forge. This is only needed for puppet masters or when running in puppet apply mode.'
     munge { |v| v.join(' ') }
