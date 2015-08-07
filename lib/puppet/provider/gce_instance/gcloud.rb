@@ -68,6 +68,9 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
       if resource[:puppet_manifest]
         metadata_args << "puppet_manifest=#{resource[:puppet_manifest]}"
       end
+      if resource[:puppet_env]
+        metadata_args << "puppet_env=#{resource[:puppet_env]}"
+      end
       args << '--metadata'
       args << "^-zz-^" + metadata_args.join('-zz-')
     end

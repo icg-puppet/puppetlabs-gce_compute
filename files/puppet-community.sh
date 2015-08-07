@@ -77,17 +77,20 @@ function configure_puppet() {
   local certname="$1"
   local master="$2"
   local service="$3"
+  local env="$4"
 
   cat >/etc/puppet/puppet.conf <<EOFPUPPETCONF
 [main]
-  server     = "${master}"
-  logdir     = /var/log/puppet
-  rundir     = /var/run/puppet
-  vardir     = /var/lib/puppet
-  ssldir     = /var/lib/puppet/ssl
-  modulepath = /etc/puppet/modules
-  certname   = "${certname}"
+  server      = "${master}"
+  logdir      = /var/log/puppet
+  rundir      = /var/run/puppet
+  vardir      = /var/lib/puppet
+  ssldir      = /var/lib/puppet/ssl
+  certname    = "${certname}"
 EOFPUPPETCONF
+  if [ -n $env ]; then
+    echo "  environment = \"${env}\"" >> /etc/puppet/puppet.conf 
+  fi
 
   local start="no"
   if [[ $service == 'present' ]]; then
@@ -151,6 +154,7 @@ function provision_puppet() {
   PUPPET_MANIFEST=$(curl -fs $MD/attributes/puppet_manifest)
   PUPPET_MODULES=$(curl -fs $MD/attributes/puppet_modules)
   PUPPET_REPOS=$(curl -fs $MD/attributes/puppet_module_repos)
+  PUPPET_ENV=$(curl -fs $MD/attributes/puppet_env)
   PUPPET_HOSTNAME=$(curl -fs $MD/hostname)
 
   # BEGIN HACK
@@ -170,7 +174,7 @@ function provision_puppet() {
   # END HACK
 
   install_puppet
-  configure_puppet "$PUPPET_HOSTNAME" "$PUPPET_MASTER" "$PUPPET_SERVICE"
+  configure_puppet "$PUPPET_HOSTNAME" "$PUPPET_MASTER" "$PUPPET_SERVICE" "$PUPPET_ENV"
   download_modules "$PUPPET_MODULES"
   clone_modules    "$PUPPET_REPOS"
   run_manifest_apply "$PUPPET_MANIFEST" "$PUPPET_HOSTNAME"
